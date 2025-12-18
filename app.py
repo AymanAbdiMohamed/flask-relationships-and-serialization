@@ -39,19 +39,28 @@ class User(db.Model, SerializerMixin):
     # Prevent circular serialization
     serialize_rules = ('-posts.user',)
 
+    def __repr__(self):
+        return f"<User id={self.id} name={self.name!r}>"
+
 
 class Post(db.Model, SerializerMixin):
     __tablename__ = 'posts'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
-    content = db.Column(db.String, nullable=False)
+    content = db.Column(db.Text, nullable=False)
 
     user_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id'),
         nullable=False
     )
+
+    # Prevent circular serialization when a Post serializes its User
+    serialize_rules = ('-user.posts',)
+
+    def __repr__(self):
+        return f"<Post id={self.id} title={self.title!r} user_id={self.user_id}>"
 
 # 
 # Routes
